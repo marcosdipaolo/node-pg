@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import { User } from "../entities/User";
-import { getRepository, InsertResult } from "typeorm";
+import { getRepository } from "typeorm";
 import { MainRepository } from "./MainRepository";
 import { UserCreateRequest } from "../http/Requests/UserCreateRequest";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
@@ -8,9 +8,7 @@ import { Logger, LoggerTransport } from "../infra/logger/Logger";
 
 export interface IUserRepository {
   getUsers(): Promise<User[]>;
-  createUser(
-    user: UserCreateRequest
-  ): Promise<QueryDeepPartialEntity<User> | null>;
+  createUser(user: UserCreateRequest): Promise<QueryDeepPartialEntity<User>>;
   getUserByEmail(email: string): Promise<User>;
 }
 
@@ -48,7 +46,7 @@ export class UserRepository extends MainRepository implements IUserRepository {
    */
   async createUser(
     user: UserCreateRequest
-  ): Promise<QueryDeepPartialEntity<User> | null> {
+  ): Promise<QueryDeepPartialEntity<User>> {
     const { firstName, lastName, email } = user;
     if (await this.getUserByEmail(email)) {
       throw new Error("Email already registered");
@@ -58,13 +56,13 @@ export class UserRepository extends MainRepository implements IUserRepository {
       lastName,
       email,
     });
-    const response: InsertResult = await this.instance.insert(newUser);
+    const response = await this.instance.insert(newUser);
     const raw: InserResultRaw = response.raw;
     if (raw.affectedRows) {
       this.logger.info(`User created with id: ${raw.insertId}`);
       return newUser;
     }
-    return null;
+    throw new Error("Something went wrong creating the user");
   }
 
   /**
@@ -77,6 +75,12 @@ export class UserRepository extends MainRepository implements IUserRepository {
       where: {
         email,
       },
+    });
+  }
+
+  deleteUser(id: number) {
+    return this.instance.delete({
+      where: {},
     });
   }
 }

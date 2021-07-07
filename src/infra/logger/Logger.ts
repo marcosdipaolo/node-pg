@@ -45,9 +45,7 @@ export class Logger {
    * @param {string} message
    */
   info(message: string) {
-    this.instance.log({
-      level: LoggerLevel.info,
-      message,
-    });
+    console.log(message);
+    this.instance.log("info", message);
   }
 }
