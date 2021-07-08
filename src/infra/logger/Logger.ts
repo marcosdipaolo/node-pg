@@ -21,7 +21,7 @@ export enum LoggerTransport {
 export class Logger {
   private instance: WinstonLogger;
   constructor(
-    private transport: LoggerTransport = LoggerTransport.console,
+    private transport: LoggerTransport = LoggerTransport.file,
     options: any = {}
   ) {
     this.instance = createLogger({
@@ -34,10 +34,7 @@ export class Logger {
    * @param {string} message
    */
   error(message: string): void {
-    this.instance.log({
-      level: LoggerLevel.error,
-      message,
-    });
+    this.instance.log(LoggerLevel.error, message);
   }
 
   /**
@@ -46,6 +43,13 @@ export class Logger {
    */
   info(message: string) {
     console.log(message);
-    this.instance.log("info", message);
+    this.instance.log(LoggerLevel.info, message);
+  }
+
+  /**
+   * @returns {WinstonLogger}
+   */
+  getInstance() {
+    return this.instance;
   }
 }
